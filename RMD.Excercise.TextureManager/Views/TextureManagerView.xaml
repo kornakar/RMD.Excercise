@@ -1,0 +1,138 @@
+﻿<UserControl x:Class="RMD.Excercise.TextureManager.Views.TextureManagerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RMD.Excercise.TextureManager.Views"
+             xmlns:cal="http://www.caliburnproject.org"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"             
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BitmapImage x:Key="RefreshImage" UriSource="/RMD.Excercise.TextureManager;component/Resources/arrow_refresh.png"/>
+        <BitmapImage x:Key="DeleteAllImage" UriSource="/RMD.Excercise.TextureManager;component/Resources/delete.png"/>
+        <BitmapImage x:Key="DeleteSelImage" UriSource="/RMD.Excercise.TextureManager;component/Resources/table_row_delete.png"/>
+        <BitmapImage x:Key="SortImage" UriSource="/RMD.Excercise.TextureManager;component/Resources/sort_columns.png"/>
+        <BitmapImage x:Key="BulletGreen" UriSource="/RMD.Excercise.TextureManager;component/Resources/bullet_green.png"/>
+        <BitmapImage x:Key="BulletRed" UriSource="/RMD.Excercise.TextureManager;component/Resources/bullet_red.png"/>
+        <BitmapImage x:Key="BulletWhite" UriSource="/RMD.Excercise.TextureManager;component/Resources/bullet_white.png"/>
+
+        <Style x:Key="ImageEnabled" TargetType="Image">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.25"></Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <CollectionViewSource x:Key="GroupedTextures" Source="{Binding TexturesToShow}">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="Path" />
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
+
+        <!-- Data template for ListBox grouping -->
+        <DataTemplate x:Key="GroupingHeader">
+            <TextBlock Text="{Binding Path=Name}" Margin="0 0 0 2" Background="Wheat" Foreground="Black" />
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="80*" />
+            <RowDefinition Height="4*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <Button cal:Message.Attach="[Event Click] = [Action RefreshTextures()]" Margin="5 5 5 5" Width="32" Height="32" ToolTip="Refresh">
+                <Image Source="{StaticResource RefreshImage}" Style="{StaticResource ImageEnabled}" />
+            </Button>
+            <Button cal:Message.Attach="[Event Click] = [Action DeleteAllDuplicates()]" Margin="5 5 5 5" Width="32" Height="32" ToolTip="Delete all duplicates">
+                <Image Source="{StaticResource DeleteAllImage}" Style="{StaticResource ImageEnabled}" />
+            </Button>
+            <Button cal:Message.Attach="[Event Click] = [Action DeleteSelectedDuplicates()]" Margin="5 5 5 5" Width="32" Height="32" ToolTip="Delete selected duplicates">
+                <Image Source="{StaticResource DeleteSelImage}" Style="{StaticResource ImageEnabled}" />
+            </Button>
+            <Button cal:Message.Attach="[Event Click] = [Action SortByName()]" Margin="5 5 5 5" Width="32" Height="32" ToolTip="Sort by name">
+                <Image Source="{StaticResource SortImage}" Style="{StaticResource ImageEnabled}" />
+            </Button>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBlock Text="Number of files found:" Margin="5 5 5 5"  />
+            <TextBlock Text="{Binding NumberOfTextures, Mode=OneWay}" Margin="5 5 5 5" Width="50" />
+
+            <TextBlock Text="Number of duplicates found:" Margin="5 5 5 5"  />
+            <TextBlock Text="{Binding NumberOfDuplicates, Mode=OneWay}" Margin="5 5 5 5" Width="50" />
+
+            <CheckBox IsChecked="{Binding ShowOnlyDuplicates, Mode=TwoWay}" Content="Show only duplicates" Margin="5 5 5 5" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <TextBlock Text="Source path:" Margin="5 5 5 5" VerticalAlignment="Center" />
+            <TextBox Text="{Binding SourcePath, Mode=TwoWay}" Width="320" Margin="5 5 5 5" VerticalAlignment="Center" />
+
+            <TextBlock Text="Search pattern:" Margin="5 5 5 5" VerticalAlignment="Center" />
+            <TextBox Text="{Binding SearchPattern, Mode=TwoWay}" Width="100" Margin="5 5 5 5" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <xctk:BusyIndicator Grid.Row="3" IsBusy="{Binding IsBusy, Mode=OneWay}" DisplayAfter="0">
+            <ListBox Margin="5 5 5 5" 
+                ItemsSource="{Binding Source={StaticResource ResourceKey=GroupedTextures}}"
+                SelectionMode="Extended"
+                cal:Message.Attach="[Event SelectionChanged] = [TexturesSelectionChanged($eventArgs)]"
+                VirtualizingStackPanel.IsVirtualizing="True" 
+                VirtualizingStackPanel.VirtualizationMode="Recycling">
+                <ListBox.GroupStyle>
+                    <GroupStyle HeaderTemplate="{StaticResource ResourceKey=GroupingHeader}" />
+                </ListBox.GroupStyle>
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <Image Grid.Row="0" Grid.Column="0">
+                                <Image.Style>
+                                    <Style TargetType="{x:Type Image}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=HasDuplicate}" Value="{x:Null}">
+                                                <Setter Property="Image.Source" Value="{StaticResource BulletWhite}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=HasDuplicate}" Value="True">
+                                                <Setter Property="Image.Source" Value="{StaticResource BulletRed}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=HasDuplicate}" Value="False">
+                                                <Setter Property="Image.Source" Value="{StaticResource BulletGreen}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Id}" Margin="10 0 0 4">
+                            </TextBlock>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </xctk:BusyIndicator>
+
+        <StatusBar Grid.Row="4" >
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="5 0 5 0" Text="{Binding StatusText, Mode=OneWay}" HorizontalAlignment="Left" />
+            </StackPanel>
+        </StatusBar>
+    </Grid>
+</UserControl>

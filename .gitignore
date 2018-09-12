@@ -1,0 +1,17 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/RMD.Excercise.Comparers/obj/Debug
+/.vs/RMD.TextureManager/v15/Server/sqlite3
+/RMD.Excercise.Interface/obj/Debug
+/RMD.Excercise.Logger/obj/Debug
+/RMD.Excercise.Tests/bin/Debug
+/RMD.Excercise.Tests/obj/Debug
+/RMD.Excercise.TextureManager/obj/Debug
+/RMD.Excercise.TextureManager.Model/obj/Debug
+/RMD.Excercise.TextureProviders/bin/Debug
+/RMD.Excercise.TextureProviders/obj/Debug
+*.suo
+/output/Debug
+/packages
